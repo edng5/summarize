@@ -12,3 +12,5 @@ summarize function
 # add a GUI
 # saveable summary
 # text to speech accessibility
+# Save to pdf
+# include images and diagrams in the output
