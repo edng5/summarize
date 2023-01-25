@@ -50,14 +50,30 @@ def summarize(text: str, per: float) -> str:
     summary='\n'.join(final_summary)
     return summary 
 
+
+def extract_text(path: str) -> str:
+    '''
+    Takes in a path or url to a source and maps document format to extract text properly.
+    path: a url or path to a source to extract text from.
+    '''
+    # TODO: add pdf, video and audio mapping
+    if path[-3:] in 'htm':
+        article = Article(path)
+        article.download()
+        article.parse()
+        return article.text
+
+
 if __name__ == "__main__":
     url = 'https://www.sciencedaily.com/releases/2021/08/210811162816.htm'
-    article = Article(url)
-    article.download()
-    article.parse()
+    # article = Article(url)
+    # article.download()
+    # article.parse()
 
-    print(article.text)
-    print(summarize(article.text, 0.1))
+    # print(article.text)
+    # print(summarize(article.text, 0.1))
+
+    text = extract_text(url)
 
     # GUI Components
     window = tk.Tk()
@@ -69,10 +85,10 @@ if __name__ == "__main__":
     label_a = tk.Label(master=frame_a, text="Summarize")
     label_a.pack()
 
-    label_b = tk.Label(master=frame_b, text=article.text)
+    label_b = tk.Label(master=frame_b, text=text)
     label_b.pack()
 
-    label_c = tk.Label(master=frame_c, text=summarize(article.text, 0.05))
+    label_c = tk.Label(master=frame_c, text=summarize(text, 0.05))
     label_c.pack()
 
     frame_a.pack()
