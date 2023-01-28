@@ -1,6 +1,6 @@
 # Summarize by Edward Ng
 # Summarizes text and extracts the key information. Supports PDF, websites and audio file inputs.
-# 1/22/2023
+# 1/27/2023
 
 from newspaper import Article
 import spacy, speech_recognition
@@ -10,6 +10,7 @@ from heapq import nlargest
 import tkinter as tk
 from tkinter import filedialog
 from PyPDF2 import PdfReader
+from tkPDFViewer import tkPDFViewer as pdf
 
 
 def summarize(text: str, per: float) -> str:
@@ -81,14 +82,13 @@ def extract_text(path: str) -> str:
 
 def browseFiles() -> None:
     '''
-    Opens a file browser.0
+    Opens a file browser.
     :returns: None
     '''
     filename = filedialog.askopenfilename(initialdir = "/",
                                           title = "Select a File",
-                                          filetypes = (("Text files",
-                                                        "*.txt*"),
-                                                       ("all files",
+                                          filetypes = (("all files",
+                                                        "*.*"), ("all files",
                                                         "*.*")))
       
     # Change label contents
@@ -98,6 +98,11 @@ def browseFiles() -> None:
     text = extract_text(path)
     text = (summarize(text,  0.20))
     summary.configure(text=text)
+    # pdf_viewer.destroy()
+    # pdf_viewer = v1.pdf_view(page_frame,
+    #              pdf_location = filename, 
+    #              width = 75, height = 100)
+    # pdf_viewer.pack(side="left")
 
 
 if __name__ == "__main__":
@@ -105,29 +110,46 @@ if __name__ == "__main__":
     url = 'https://www.sciencedaily.com/releases/2021/08/210811162816.htm'
 
     # GUI Components
-    window = tk.Tk()
+    root = tk.Tk()
 
-    label_file_explorer = tk.Label(window,
+    root.geometry("1080x1080")
+
+    page_frame = tk.Frame(root,  width=75,  height=100,  bg='grey')
+    page_frame.pack(side='left',  fill='both',  padx=10,  pady=5,  expand=True)
+    work_frame = tk.Frame(root,  width=50,  height=100)
+    work_frame.pack(side='right',  fill='both',  padx=10,  pady=5,  expand=True)
+
+
+    label_file_explorer = tk.Label(work_frame,
                             text = "Summarize",
                             width = 100, height = 4,
                             fg = "blue")
-    label_file_explorer.pack()
+    label_file_explorer.pack(side="top")
 
-    button_explore = tk.Button(window,
+    button_explore = tk.Button(work_frame,
                         text = "Browse Files",
                         command = browseFiles)
   
-    button_exit = tk.Button(window,
+    button_exit = tk.Button(work_frame,
                      text = "Exit",
                      command = exit)
 
-    label_file_explorer.grid(column = 1, row = 1)
+    label_file_explorer.pack(side="top")
   
-    button_explore.grid(column = 1, row = 2)
+    button_explore.pack(side="right")
     
-    button_exit.grid(column = 1,row = 3)
+    button_exit.pack(side="left")
 
-    summary = tk.Label(window, text='')
-    summary.grid(column = 1, row = 4)
+    summary = tk.Label(work_frame, text='')
+    summary.pack(side="bottom")
 
-    window.mainloop()
+    v1 = pdf.ShowPdf()
+
+    filename = r"E:\Downloads\1-s2.0-S2590005622000595-main.pdf"
+    pdf_viewer = v1.pdf_view(page_frame,
+                 pdf_location = filename, 
+                 width = 75, height = 100)
+
+    pdf_viewer.pack(side="left")
+
+    root.mainloop()
