@@ -1,6 +1,6 @@
 # Summarize by Edward Ng
 # Summarizes text and extracts the key information. Supports PDF, websites and audio file inputs.
-# 1/27/2023
+# 1/22/2023
 
 from newspaper import Article
 import spacy, speech_recognition
@@ -12,10 +12,14 @@ from tkinter import filedialog
 from PyPDF2 import PdfReader
 from tkPDFViewer import tkPDFViewer as pdf
 
+from transformers import PegasusForConditionalGeneration
+from transformers import PegasusTokenizer
+from transformers import pipeline
 
-def summarize(text: str, per: float) -> str:
+
+def text_rank_summarize(text: str, per: float) -> str:
     '''
-    Takes in text and a percentge and summarizes the text to highlight key information.
+    Uses the text rank algorithm to produce an extractive text summarization.
     text: The text to summarize.
     per: percentage of sentence.
     :returns: string of summarized text.
@@ -23,18 +27,17 @@ def summarize(text: str, per: float) -> str:
     # load English pipeline
     nlp = spacy.load('en_core_web_sm')
     doc= nlp(text)
-    tokens=[token.text for token in doc]
+    # tokens=[token.text for token in doc]
 
     # normalize word frequencies and rank sentences to find importance
     word_freq={}
     for word in doc:
         # filter out STOP_WORDS
-        if word.text.lower() not in list(STOP_WORDS):
-            if word.text.lower() not in punctuation:
-                if word.text not in word_freq.keys():
-                    word_freq[word.text] = 1
-                else:
-                    word_freq[word.text] += 1
+        if word.text.lower() not in list(STOP_WORDS) and word.text.lower() not in punctuation:
+            if word.text not in word_freq.keys():
+                word_freq[word.text] = 1
+            else:
+                word_freq[word.text] += 1
     max_freq=max(word_freq.values())
     for word in word_freq.keys():
         word_freq[word]=word_freq[word]/max_freq
@@ -52,6 +55,43 @@ def summarize(text: str, per: float) -> str:
     final_summary=[word.text for word in summary]
     summary='\n'.join(final_summary)
     return summary 
+
+
+def pegasus_summarize(text: str) -> str:
+    '''
+    Uses Pegasus pretrained model to produce abstractive text summarization.
+    :text - the text to summarize
+    :returns: string of summarized text.
+    '''
+    model = "google/pegasus-xsum"
+    pegasus_tokenizer = PegasusTokenizer.from_pretrained(model)
+
+    # Define PEGASUS model
+    pegasus_model = PegasusForConditionalGeneration.from_pretrained(model)
+
+    # Create tokens
+    tokens = pegasus_tokenizer(text, truncation=True, padding="longest", return_tensors="pt")
+
+    # Summarize text
+    encoded_summary = pegasus_model.generate(**tokens)
+
+    # Decode summarized text
+    decoded_summary = pegasus_tokenizer.decode(
+        encoded_summary[0],
+        skip_special_tokens=True
+    )
+
+    # Define summarization pipeline 
+    summarizer = pipeline(
+        "summarization", 
+        model=model, 
+        tokenizer=pegasus_tokenizer, 
+        framework="pt"
+    )
+
+    summary = summarizer(text, min_length=30, max_length=150)
+
+    return summary[0]["summary_text"]
 
 
 def extract_text(path: str) -> str:
@@ -96,13 +136,13 @@ def browseFiles() -> None:
 
     path = filename
     text = extract_text(path)
-    text = (summarize(text,  0.20))
+    text = (text_rank_summarize(text,  0.20))
+    # can only pass a max length in pegasus?
+    # text = pegasus_summarize(text)
     summary.configure(text=text)
-    # pdf_viewer.destroy()
-    # pdf_viewer = v1.pdf_view(page_frame,
+    # v1.pdf_view(page_frame,
     #              pdf_location = filename, 
     #              width = 75, height = 100)
-    # pdf_viewer.pack(side="left")
 
 
 if __name__ == "__main__":
@@ -149,6 +189,13 @@ if __name__ == "__main__":
     pdf_viewer = v1.pdf_view(page_frame,
                  pdf_location = filename, 
                  width = 75, height = 100)
+
+    #destroy and recreate to refresh the pdf viewer
+    # if FLAG == 1:
+    #     pdf_viewer.destroy()
+    #     pdf_viewer = v1.pdf_view(page_frame,
+    #              pdf_location = filename, 
+    #              width = 75, height = 100)
 
     pdf_viewer.pack(side="left")
 
