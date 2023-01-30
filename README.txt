@@ -1,8 +1,11 @@
 Summarize by Edward Ng (2023)
-Summarizes text and extracts the key information. Supports PDF, websites and audio file inputs.
+Summarizes text and extracts the key information to display as a PDF. Supports PDF, websites and audio file inputs.
+Two methods of summary:
+  Extractive Text Summary - by using a text rank algorithm.
+  Abstractive Text Summary - by using Pegasus Transformer pretrained model.
 
-Uses spaCy, 
-Uses en_core_web_sm
+Uses SpaCy, Transformer
+Uses en_core_web_sm, Pegasus
 
 COMPLETED:
 summarize function
