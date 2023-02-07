@@ -74,7 +74,7 @@ def summarize() -> None:
     if extractive:
         text = extract_text(file)
         print(text)
-        text = (text_rank_summarize(text,  0.10))
+        text = (text_rank_summarize(text,  0.05))
     else:
     # can only pass a max length 512 in pegasus?
         text = extract_text(file)
@@ -85,10 +85,12 @@ def summarize() -> None:
     new_pdf = FPDF('P', 'mm', 'A4')
     new_pdf.add_page()
     new_pdf.set_margins(0, 0, 0)
-    new_pdf.set_font("Times", size = 15)
+    new_pdf.set_font("Times", 'B', size = 15)
     new_pdf.cell(200, 10, txt = "Summary of "+filename, ln = 1, align = 'C')
-    new_pdf.cell(200, 10, txt = text,ln = 2, align = 'C')
-    save_location = file.replace(filename, filename+"_summary.pdf")
+    new_pdf.add_font(fname='Quivira.otf', uni=True)
+    new_pdf.set_font("Quivira", size = 12)
+    new_pdf.multi_cell(0, 7, txt = text, align = 'L')
+    save_location = file.replace(filename, filename.replace(".pdf", "")+"_summary.pdf")
     new_pdf.output(save_location)
     open_pdf(save_location)
     print(text)
