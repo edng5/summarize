@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import filedialog
 # from utils import run
 from tkPDFViewer import tkPDFViewer as pdf
+from fpdf import FPDF 
+import os
 
 from utils import *
 
@@ -14,24 +16,34 @@ def browseFiles() -> None:
     Opens a file browser.
     :return: None
     '''
-    if button_explore.cget('text') == "Browse Files":
-        filename = filedialog.askopenfilename(initialdir = "/",
-                                            title = "Select a File",
-                                            filetypes = (("all files",
-                                                            "*.*"), ("all files",
-                                                            "*.*")))
-        
-        # Change label contents
-        text_file.delete("1.0","end")
-        text_file.insert("1.0", filename)
-        file_type = get_file_type(filename)
-        label_file_type.configure(text="File Type: "+ file_type)
-        # text = extract_text(filename)
-        # text = (text_rank_summarize(text,  0.20))
-        # can only pass a max length 512 in pegasus?
-        # text = pegasus_summarize(text)
-        # summary.configure(text=text)
-        open_pdf(filename)
+    filename = filedialog.askopenfilename(initialdir = "/",
+                                        title = "Select a File",
+                                        filetypes = (("all files",
+                                                        "*.*"), ("all files",
+                                                        "*.*")))
+    
+    # Change label contents
+    text_file.configure(state="normal")
+    text_file.delete("1.0","end")
+    text_file.insert("1.0", filename)
+    text_file.configure(state="disabled")
+    file_type = get_file_type(filename)
+    label_file_type.configure(text="File Type: "+ file_type)
+    open_pdf(filename)
+
+
+def searchURL() -> None:
+    pass
+
+
+def clear() -> None:
+    '''
+    Clears text field when disabled.
+    :return: None
+    '''
+    text_file.delete("1.0","end")
+    text_file.configure(state="normal")
+
 
 def open_pdf(file: str) -> None:
     '''
@@ -53,18 +65,45 @@ def open_pdf(file: str) -> None:
         pdf_viewer.pack()
 
 
-def detect_file_path() -> None:
-    '''
-    Keep Browse Button updated to searching or browsing.
-    :return: None
-    '''
-    path = text_file.get("1.0", "end")
-    print(path)
-    if get_file_type(path) == "Website":
-        button_explore["text"]="Search"
+def summarize() -> None:
+    file = text_file.get("1.0", "end").replace('\n', "")
+    if file == '' or file is None:
+        return
+    
+    extractive = True
+    if extractive:
+        text = extract_text(file)
+        print(text)
+        text = (text_rank_summarize(text,  0.10))
     else:
-        button_explore["text"]="Browse Files"
+    # can only pass a max length 512 in pegasus?
+        text = extract_text(file)
+        text = pegasus_summarize(text)
 
+    # Output Summary
+    filename = os.path.basename(file)
+    new_pdf = FPDF('P', 'mm', 'A4')
+    new_pdf.add_page()
+    new_pdf.set_margins(0, 0, 0)
+    new_pdf.set_font("Times", size = 15)
+    new_pdf.cell(200, 10, txt = "Summary of "+filename, ln = 1, align = 'C')
+    new_pdf.cell(200, 10, txt = text,ln = 2, align = 'C')
+    save_location = file.replace(filename, filename+"_summary.pdf")
+    new_pdf.output(save_location)
+    open_pdf(save_location)
+    print(text)
+
+
+def settings() -> None:
+    pass
+
+
+def speech() -> None:
+    pass
+
+
+def save() -> None:
+    pass
 
 #===================================================MAIN============================================================#
 
@@ -135,25 +174,33 @@ if __name__ == "__main__":
     text_last_page = tk.Text(center_right_frame, width=2, height=1)
 
     # Button Components
+    button_search = tk.Button(top_right_frame,
+                        text = "Search",
+                        command = searchURL)
+                        
     button_explore = tk.Button(top_right_frame,
                         text = "Browse Files",
                         command = browseFiles)
+    
+    button_clear = tk.Button(top_right_frame,
+                        text = "Clear",
+                        command = clear)
   
     button_summarize = tk.Button(center2_right_frame,
                      text = "Summarize",
-                     command = exit)
+                     command = summarize)
 
     button_settings = tk.Button(center2_left_frame,
                      text = "Settings",
-                     command = exit)
+                     command = settings)
 
     button_speech = tk.Button(bottom_left_frame,
                      text = "Speech",
-                     command = exit)
+                     command = speech)
 
     button_save = tk.Button(bottom_right_frame,
                      text = "Save",
-                     command = exit)
+                     command = save)
 
     # PDF Viewer Component
     view = pdf.ShowPdf()
@@ -162,7 +209,11 @@ if __name__ == "__main__":
     # Pack components
     text_file.pack()
 
-    button_explore.pack()
+    button_search.pack(side="left")
+
+    button_clear.pack(side="right")
+
+    button_explore.pack(side="right")
     
     text_first_page.pack()
 
@@ -177,7 +228,5 @@ if __name__ == "__main__":
     button_save.pack()
 
     pdf_viewer.pack()
-
-    detect_file_path()
     
     root.mainloop()
