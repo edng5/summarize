@@ -87,13 +87,12 @@ def summarize() -> None:
     new_pdf.set_margins(0, 0, 0)
     new_pdf.set_font("Times", 'B', size = 15)
     new_pdf.cell(200, 10, txt = "Summary of "+filename, ln = 1, align = 'C')
-    new_pdf.add_font(fname='Quivira.otf', uni=True)
-    new_pdf.set_font("Quivira", size = 12)
+    new_pdf.add_font(fname='unicode_font.otf', uni=True)
+    new_pdf.set_font("unicode_font", size = 12)
     new_pdf.multi_cell(0, 7, txt = text, align = 'L')
     save_location = file.replace(filename, filename.replace(".pdf", "")+"_summary.pdf")
     new_pdf.output(save_location)
     open_pdf(save_location)
-    print(text)
 
 
 def settings() -> None:
