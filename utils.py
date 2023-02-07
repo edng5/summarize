@@ -96,25 +96,26 @@ def extract_text(path: str) -> str:
     :return: string of text to process on.
     '''
     # TODO: add pdf, video and audio mapping
-    if not path:
-        return ''
-    elif path[:3] in 'http':
+    file_type = get_file_type(path)
+    
+    if file_type == "Website":
         article = Article(path)
         article.download()
         article.parse()
         return article.text
-    elif path[-3:] in 'txt':
+    elif file_type == "Text File":
         with open(path, 'r') as f:
             text = f.read()
         return text
-    elif path[-3:] in 'pdf':
+    elif file_type == "PDF File":
         reader = PdfReader(path)
-        page = reader.pages[0]
-        text = page.extract_text()
-        # text = ''
-        # for page in reader.pages:
-            # text = text + page.extract_text()
+        # page = reader.pages[0]
+        # text = page.extract_text()
+        text = ''
+        for page in reader.pages:
+            text = text + page.extract_text()
         return text
+    return ""
 
 def get_file_type(path: str) -> str:
     '''
@@ -124,9 +125,11 @@ def get_file_type(path: str) -> str:
     '''
     if not path:
         return ''
-    elif path[:3] in 'http':
+    elif  'http' in path[:3]:
         return "Website"
-    elif path[-3:] in 'txt':
+    elif 'txt' in path[-3:]:
         return "Text File"
-    elif path[-3:] in 'pdf':
+    elif 'pdf' in path[-3:]:
         return "PDF File"
+    else:
+        return ''
