@@ -16,16 +16,20 @@ Uses en_core_web_sm, Pegasus
 # COMPLETED:
 summarize function
 
+supports PDF
+
+interface to view PDFs
+
+saves summary
+
 # TODOs:
  allow more file inputs
  
- add a GUI
- 
- saveable summary
- 
  text to speech accessibility
  
- Save to pdf
- 
  include images and diagrams in the output
+ 
+ clean up GUI
+ 
+ settings to switch between both summary methods
  
