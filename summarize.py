@@ -1,15 +1,15 @@
 # Summarize by Edward Ng
 # Summarizes text and extracts the key information. Supports PDF, websites and audio file inputs.
-# 1/22/2023
+# 02/08/2023
 
 import tkinter as tk
 from tkinter import filedialog
-# from utils import run
 from tkPDFViewer import tkPDFViewer as pdf
 from fpdf import FPDF 
 import os
 
 from utils import *
+
 
 def browseFiles() -> None:
     '''
@@ -18,22 +18,38 @@ def browseFiles() -> None:
     '''
     filename = filedialog.askopenfilename(initialdir = "/",
                                         title = "Select a File",
-                                        filetypes = (("all files",
-                                                        "*.*"), ("all files",
+                                        filetypes = (("pdf",
+                                                        ".pdf"), ("all files",
                                                         "*.*")))
     
-    # Change label contents
     text_file.configure(state="normal")
     text_file.delete("1.0","end")
     text_file.insert("1.0", filename)
     text_file.configure(state="disabled")
     file_type = get_file_type(filename)
     label_file_type.configure(text="File Type: "+ file_type)
-    open_pdf(filename)
+    if file_type != "PDF File":
+        convert(filename, file_type)
+        open(filename.replace("txt", "pdf"))
+    else:
+        open_pdf(filename)
 
 
 def searchURL() -> None:
     pass
+
+
+def convert(filename, file_type):
+    if file_type == "Text File":
+        new_pdf = FPDF()  
+        new_pdf.add_page()
+        new_pdf.set_font("Arial", size = 15)
+        
+        f = open(filename, "r")
+        
+        for x in f:
+            new_pdf.cell(200, 10, txt = x, ln = 1, align = 'C')
+        new_pdf.output(filename.replace("txt", "pdf"))  
 
 
 def clear() -> None:
@@ -54,26 +70,25 @@ def open_pdf(file: str) -> None:
     global pdf_viewer
 
     if file:
-        # if old instance exists, destroy it first
         if pdf_viewer:
             pdf_viewer.destroy()
         view = pdf.ShowPdf()
-        # clear the stored image list
         view.img_object_li.clear()
-        # shows the new images extracted from PDF file
-        pdf_viewer = view.pdf_view(page_frame, pdf_location=file, width=75, height=100) # smaller height
+        pdf_viewer = view.pdf_view(page_frame, pdf_location=file, width=75, height=100)
         pdf_viewer.pack()
 
 
 def summarize() -> None:
+    '''
+    Take the file path from text field and summarize the file and output in the PDF viewer.
+    :return: None
+    '''
     file = text_file.get("1.0", "end").replace('\n', "")
     if file == '' or file is None:
         return
-    
-    extractive = True
-    if extractive:
+
+    if  variable.get() == "Extractive":
         text = extract_text(file)
-        print(text)
         text = (text_rank_summarize(text,  0.05))
     else:
     # can only pass a max length 512 in pegasus?
@@ -95,16 +110,10 @@ def summarize() -> None:
     open_pdf(save_location)
 
 
-def settings() -> None:
-    pass
-
-
 def speech() -> None:
     pass
 
 
-def save() -> None:
-    pass
 
 #===================================================MAIN============================================================#
 
@@ -152,6 +161,30 @@ if __name__ == "__main__":
     center_right_frame = tk.Frame(center_frame,  width=25,  height=5)
     center_right_frame.pack(side="right", fill='both',  expand=True)
 
+    smaller_frame = tk.Frame(center_right_frame,  width=15,  height=1)
+    smaller_frame.pack(fill='both',  expand=True)
+    
+    label_page_num = tk.Label(center_left_frame,
+                                text = "Summarize pages:",
+                                width = 20, height = 1,
+                                fg = "blue")
+    label_page_num.pack()
+
+    text_first_page = tk.Text(smaller_frame, width=2, height=1)
+    text_last_page = tk.Text(smaller_frame, width=2, height=1)
+    text_first_page.pack(side="right")
+    text_last_page.pack(side="right")
+    
+    label_summary_method = tk.Label(center_left_frame,
+                                text = "Summary Method:",
+                                width = 20, height = 1,
+                                fg = "blue")
+    label_summary_method.pack()
+    variable = tk.StringVar(center_right_frame)
+    variable.set("Extractive")
+    dropdown = tk.OptionMenu(center_right_frame, variable, "Extractive", "Abstractive")
+    dropdown.pack()
+
     center2_left_frame = tk.Frame(center2_frame,  width=25,  height=5)
     center2_left_frame.pack(side="left", fill='both',  expand=True)
     center2_right_frame = tk.Frame(center2_frame,  width=25,  height=5)
@@ -162,17 +195,8 @@ if __name__ == "__main__":
     bottom_right_frame = tk.Frame(bottom_frame,  width=40,  height=2)
     bottom_right_frame.pack(side="right", fill='both',  expand=True)
 
-    label_page_num = tk.Label(center_left_frame,
-                            text = "Summarize pages:",
-                            width = 20, height = 1,
-                            fg = "blue")
-    label_page_num.pack(side="left")
-
     # Text Field
     text_file = tk.Text(top_left_frame, width=50, height=2)
-    
-    text_first_page = tk.Text(center_left_frame, width=2, height=1)
-    text_last_page = tk.Text(center_right_frame, width=2, height=1)
 
     # Button Components
     button_search = tk.Button(top_right_frame,
@@ -191,17 +215,11 @@ if __name__ == "__main__":
                      text = "Summarize",
                      command = summarize)
 
-    button_settings = tk.Button(center2_left_frame,
-                     text = "Settings",
-                     command = settings)
-
-    button_speech = tk.Button(bottom_left_frame,
+    button_speech = tk.Button(center2_left_frame,
                      text = "Speech",
                      command = speech)
 
-    button_save = tk.Button(bottom_right_frame,
-                     text = "Save",
-                     command = save)
+    
 
     # PDF Viewer Component
     view = pdf.ShowPdf()
@@ -215,18 +233,10 @@ if __name__ == "__main__":
     button_clear.pack(side="right")
 
     button_explore.pack(side="right")
-    
-    text_first_page.pack()
-
-    text_last_page.pack()
-
-    button_settings.pack()
 
     button_summarize.pack()
 
     button_speech.pack()
-
-    button_save.pack()
 
     pdf_viewer.pack()
     
