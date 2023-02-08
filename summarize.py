@@ -29,8 +29,8 @@ def browseFiles() -> None:
     file_type = get_file_type(filename)
     label_file_type.configure(text="File Type: "+ file_type)
     if file_type != "PDF File":
-        convert(filename, file_type)
-        open(filename.replace("txt", "pdf"))
+        filename = convert(filename, file_type)
+        open_pdf(filename)
     else:
         open_pdf(filename)
 
@@ -39,17 +39,28 @@ def searchURL() -> None:
     pass
 
 
-def convert(filename, file_type):
+def convert(filename: str, file_type: str) -> str:
+    '''
+    Convert files into PDFs.
+    :param filename: path of the file.
+    :param file_type: type of the file.
+    :return: path of the new converted PDF
+    '''
     if file_type == "Text File":
         new_pdf = FPDF()  
         new_pdf.add_page()
-        new_pdf.set_font("Arial", size = 15)
+        new_pdf.set_margins(0, 0, 0)
+        new_pdf.add_font(fname='unicode_font.otf', uni=True)
+        new_pdf.set_font("unicode_font", size = 12)
         
         f = open(filename, "r")
         
-        for x in f:
-            new_pdf.cell(200, 10, txt = x, ln = 1, align = 'C')
-        new_pdf.output(filename.replace("txt", "pdf"))  
+        for text in f:
+            # new_pdf.cell(200, 10, txt = x, ln = 1, align = 'C')
+            new_pdf.multi_cell(0, 7, txt = text, align = 'L')
+        new_filename = filename.replace("txt", "pdf")
+        new_pdf.output(new_filename)
+        return new_filename
 
 
 def clear() -> None:
