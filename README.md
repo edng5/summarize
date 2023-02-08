@@ -14,9 +14,9 @@ Uses SpaCy, Transformer
 Uses en_core_web_sm, Pegasus
 
 # COMPLETED:
-summarize function
+abstractive and extractive summarize function
 
-supports PDF
+supports PDF, Text Files
 
 interface to view PDFs
 
@@ -31,5 +31,5 @@ saves summary
  
  clean up GUI
  
- settings to switch between both summary methods
+ abstractive length constraint issue
  
