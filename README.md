@@ -1,6 +1,6 @@
 # Summarize by Edward Ng (2023)
 
-Summarizes text and extracts the key information to display as a PDF. Supports PDF, websites and audio file inputs.
+Summarizes text and extracts the key information to display as a PDF. Supports PDF, text files and journal websites.
 
 Two methods of summary:
   Extractive Text Summary by using a text rank algorithm. Uses a text rank algorithm to extract the most important sentences to compile into a summary.
