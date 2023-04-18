@@ -10,9 +10,9 @@ Two methods of summary:
   
   
 
-Uses SpaCy, Transformer, Tkinter
+> Uses SpaCy, Transformer, Tkinter
 
-Uses en_core_web_sm and Pegasus pretrained models
+> Uses en_core_web_sm and Pegasus pretrained models
 
 # COMPLETED:
 abstractive and extractive summarize function
