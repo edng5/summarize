@@ -14,23 +14,4 @@ Two methods of summary:
 
 > Uses en_core_web_sm and Pegasus pretrained models
 
-# COMPLETED:
-abstractive and extractive summarize function
-
-supports PDF, Text Files
-
-interface to view PDFs
-
-saves summary
-
-# TODOs:
- allow more file inputs
- 
- text to speech accessibility
- 
- include images and diagrams in the output
- 
- clean up GUI
- 
- abstractive length constraint issue
  
